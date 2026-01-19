@@ -28,6 +28,7 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
 
   const checkSession = React.useCallback(async (): Promise<void> => {
     try {
+      setState((prev) => ({ ...prev, isLoading: true }));
       const { data, error } = await authClient.getUser();
 
       if (error) {

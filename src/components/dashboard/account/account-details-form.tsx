@@ -1,27 +1,19 @@
 'use client';
 
 import * as React from 'react';
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
 import Grid from '@mui/material/Grid';
 import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
 import OutlinedInput from '@mui/material/OutlinedInput';
-import Select from '@mui/material/Select';
-
-const states = [
-  { value: 'alabama', label: 'Alabama' },
-  { value: 'new-york', label: 'New York' },
-  { value: 'san-francisco', label: 'San Francisco' },
-  { value: 'los-angeles', label: 'Los Angeles' },
-] as const;
+import { useUser } from '@/hooks/use-user';
 
 export function AccountDetailsForm(): React.JSX.Element {
+  const { user } = useUser();
+
   return (
     <form
       onSubmit={(event) => {
@@ -29,7 +21,7 @@ export function AccountDetailsForm(): React.JSX.Element {
       }}
     >
       <Card>
-        <CardHeader subheader="The information can be edited" title="Profile" />
+        <CardHeader subheader="User profile information" title="Profile" />
         <Divider />
         <CardContent>
           <Grid container spacing={3}>
@@ -39,9 +31,14 @@ export function AccountDetailsForm(): React.JSX.Element {
                 xs: 12,
               }}
             >
-              <FormControl fullWidth required>
-                <InputLabel>First name</InputLabel>
-                <OutlinedInput defaultValue="Sofia" label="First name" name="firstName" />
+              <FormControl fullWidth>
+                <InputLabel>Name</InputLabel>
+                <OutlinedInput 
+                  label="Name" 
+                  name="name" 
+                  value={user?.name || ''} 
+                  readOnly
+                />
               </FormControl>
             </Grid>
             <Grid
@@ -50,20 +47,14 @@ export function AccountDetailsForm(): React.JSX.Element {
                 xs: 12,
               }}
             >
-              <FormControl fullWidth required>
-                <InputLabel>Last name</InputLabel>
-                <OutlinedInput defaultValue="Rivers" label="Last name" name="lastName" />
-              </FormControl>
-            </Grid>
-            <Grid
-              size={{
-                md: 6,
-                xs: 12,
-              }}
-            >
-              <FormControl fullWidth required>
+              <FormControl fullWidth>
                 <InputLabel>Email address</InputLabel>
-                <OutlinedInput defaultValue="sofia@devias.io" label="Email address" name="email" />
+                <OutlinedInput 
+                  label="Email address" 
+                  name="email" 
+                  value={user?.email || ''} 
+                  readOnly
+                />
               </FormControl>
             </Grid>
             <Grid
@@ -73,8 +64,14 @@ export function AccountDetailsForm(): React.JSX.Element {
               }}
             >
               <FormControl fullWidth>
-                <InputLabel>Phone number</InputLabel>
-                <OutlinedInput label="Phone number" name="phone" type="tel" />
+                <InputLabel>Mobile number</InputLabel>
+                <OutlinedInput 
+                  label="Mobile number" 
+                  name="mobile" 
+                  type="tel"
+                  value={''}
+                  readOnly
+                />
               </FormControl>
             </Grid>
             <Grid
@@ -84,33 +81,17 @@ export function AccountDetailsForm(): React.JSX.Element {
               }}
             >
               <FormControl fullWidth>
-                <InputLabel>State</InputLabel>
-                <Select defaultValue="New York" label="State" name="state" variant="outlined">
-                  {states.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid
-              size={{
-                md: 6,
-                xs: 12,
-              }}
-            >
-              <FormControl fullWidth>
-                <InputLabel>City</InputLabel>
-                <OutlinedInput label="City" />
+                <InputLabel>Role</InputLabel>
+                <OutlinedInput 
+                  label="Role" 
+                  name="role" 
+                  value={user?.role || ''} 
+                  readOnly
+                />
               </FormControl>
             </Grid>
           </Grid>
         </CardContent>
-        <Divider />
-        <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button variant="contained">Save details</Button>
-        </CardActions>
       </Card>
     </form>
   );

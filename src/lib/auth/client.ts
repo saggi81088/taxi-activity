@@ -1,11 +1,28 @@
 'use client';
 
 import type { User } from '@/types/user';
+import axiosInstance from '@/lib/axios';
+
+// Decode JWT token
+function decodeToken(token: string): { data?: Record<string, unknown>; error?: string } {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replaceAll('-', '+').replaceAll('_', '/');
+    const jsonPayload = decodeURIComponent(
+      [...atob(base64)]
+        .map((c) => '%' + ('00' + c.codePointAt(0)?.toString(16)).slice(-2))
+        .join('')
+    );
+    return { data: JSON.parse(jsonPayload) };
+  } catch {
+    return { error: 'Failed to decode token' };
+  }
+}
 
 function generateToken(): string {
   const arr = new Uint8Array(12);
   globalThis.crypto.getRandomValues(arr);
-  return Array.from(arr, (v) => v.toString(16).padStart(2, '0')).join('');
+  return [...arr].map((v) => v.toString(16).padStart(2, '0')).join('');
 }
 
 const user = {
@@ -54,17 +71,40 @@ class AuthClient {
   async signInWithPassword(params: SignInWithPasswordParams): Promise<{ error?: string }> {
     const { email, password } = params;
 
-    // Make API request
+    try {
+      // Use Next.js proxy instead of direct CI API call
+      const response = await axiosInstance.post('/auth/login', { email, password });
 
-    // We do not handle the API, so we'll check if the credentials match with the hardcoded ones.
-    if (email !== 'sofia@devias.io' || password !== 'Secret1') {
-      return { error: 'Invalid credentials' };
+      const { access_token } = response.data;
+
+      if (!access_token) {
+        return { error: 'No access token received' };
+      }
+
+      // Store the token
+      localStorage.setItem('custom-auth-token', access_token);
+
+      // Decode token to verify it contains user data
+      const { data: _decodedToken, error: decodeError } = decodeToken(access_token);
+      if (decodeError) {
+        return { error: decodeError };
+      }
+
+      return {};
+    } catch (error_: unknown) {
+      const err = error_ as Record<string, unknown>;
+      let errorMessage = 'Sign in failed';
+      
+      // Handle axios error response
+      if ((err as Record<string, unknown>).response && typeof (err as Record<string, unknown>).response === 'object') {
+        const responseData = (err as Record<string, unknown>).response as Record<string, unknown>;
+        errorMessage = (responseData.data as Record<string, unknown>)?.message as string || 'Sign in failed';
+      } else if ((err as Record<string, unknown>).message) {
+        errorMessage = (err as Record<string, unknown>).message as string;
+      }
+      
+      return { error: errorMessage };
     }
-
-    const token = generateToken();
-    localStorage.setItem('custom-auth-token', token);
-
-    return {};
   }
 
   async resetPassword(_: ResetPasswordParams): Promise<{ error?: string }> {
@@ -83,6 +123,23 @@ class AuthClient {
 
     if (!token) {
       return { data: null };
+    }
+
+    // Decode token to get user data with role
+    const { data: decodedToken } = decodeToken(token);
+    
+    if (decodedToken?.data && typeof decodedToken.data === 'object' && decodedToken.data !== null) {
+      const tokenData = decodedToken.data as Record<string, unknown>;
+      const userData = {
+        id: String(tokenData.id || 'USR-000'),
+        name: String(tokenData.name || ''),
+        email: String(tokenData.email || ''),
+        role: String(tokenData.role || 'promoter'),
+      } as User;
+      // Return user data from JWT
+      return {
+        data: userData,
+      };
     }
 
     return { data: user };

@@ -31,3 +31,21 @@ html {
 body {
   height: 100%;
 }
+
+/* Hide Next.js devtools badge (dev overlay) when it appears */
+[data-next-badge] {
+  display: none !important;
+}
+
+/* Hide Next.js dev toast and badge wrapper used by newer Next versions */
+[data-nextjs-toast],
+.nextjs-toast,
+[data-next-badge-root],
+[data-nextjs-toast-wrapper],
+[data-next-badge-root] > [data-next-badge],
+[data-next-badge-root] * {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
