@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography';
 
 import { AdminCount } from '@/components/dashboard/overview/admin-count';
 import { PromoterCount } from '@/components/dashboard/overview/promoter-count';
+import { FeedbackCount } from '@/components/dashboard/overview/feedback-count';
 import { LatestProducts } from '@/components/dashboard/overview/latest-products';
 import { Budget } from '@/components/dashboard/overview/budget';
 import { SamplingCompletedToday } from '@/components/dashboard/overview/sampling-completed-today';
@@ -82,19 +83,22 @@ export default function Page() {
           Overview
         </Typography>
 
-        {/* Top metrics row - four compact cards */}
+        {/* Top metrics row - five compact cards */}
         <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          <Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
             <Budget value={`${taxiCount}`} trend="up" />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          <Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
             <SamplingCompletedToday value={`${samplingCount}`} />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          <Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
             <AdminCount />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          <Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
             <PromoterCount />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
+            <FeedbackCount />
           </Grid>
         </Grid>
 

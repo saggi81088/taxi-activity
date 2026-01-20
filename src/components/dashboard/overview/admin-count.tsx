@@ -1,11 +1,13 @@
 'use client';
 
 import * as React from 'react';
+import Avatar from '@mui/material/Avatar';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
+import Typography from '@mui/material/Typography';
+import { ShieldCheckIcon } from '@phosphor-icons/react/dist/ssr/ShieldCheck';
 import { useUsers } from '@/hooks/use-users';
 
 export function AdminCount(): React.JSX.Element {
@@ -14,36 +16,23 @@ export function AdminCount(): React.JSX.Element {
   return (
     <Card>
       <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box>
-            <Typography color="textSecondary" variant="overline" sx={{ fontWeight: 500 }}>
-              Admin Users
-            </Typography>
-            {isLoading ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                <CircularProgress size={24} />
-              </Box>
-            ) : (
-              <Typography variant="h4" sx={{ mt: 1, fontWeight: 600 }}>
-                {adminCount}
+        <Stack spacing={2}>
+          <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between' }} spacing={3}>
+            <Stack spacing={1}>
+              <Typography color="text.secondary" variant="overline">
+                Admin Users
               </Typography>
-            )}
-          </Box>
-          <Box
-            sx={{
-              backgroundColor: 'rgba(76, 175, 80, 0.1)',
-              borderRadius: '50%',
-              width: 56,
-              height: 56,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 28,
-            }}
-          >
-            👤
-          </Box>
-        </Box>
+              {isLoading ? (
+                <CircularProgress size={32} />
+              ) : (
+                <Typography variant="h4">{adminCount}</Typography>
+              )}
+            </Stack>
+            <Avatar sx={{ backgroundColor: 'var(--mui-palette-primary-main)', height: '56px', width: '56px' }}>
+              <ShieldCheckIcon fontSize="var(--icon-fontSize-lg)" />
+            </Avatar>
+          </Stack>
+        </Stack>
       </CardContent>
     </Card>
   );

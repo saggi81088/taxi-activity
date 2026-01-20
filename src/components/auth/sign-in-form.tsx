@@ -66,8 +66,8 @@ export function SignInForm(): React.JSX.Element {
       // Wait a tick to ensure state updates are flushed
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      // Redirect to dashboard after successful login
-      router.replace(paths.dashboard.overview);
+      // Redirect to Vehicle Search (default page) after successful login
+      router.replace(paths.dashboard.vehicleSearch);
     },
     [checkSession, router, setError]
   );
@@ -124,11 +124,6 @@ export function SignInForm(): React.JSX.Element {
               </FormControl>
             )}
           />
-          <div>
-            <Link component={RouterLink} href={paths.auth.resetPassword} variant="subtitle2">
-              Forgot password?
-            </Link>
-          </div>
           {errors.root ? <Alert color="error">{errors.root.message}</Alert> : null}
           <Button disabled={isPending} type="submit" variant="contained" sx={{ position: 'relative' }}>
             {isPending ? (

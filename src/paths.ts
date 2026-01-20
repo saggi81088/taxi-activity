@@ -4,11 +4,9 @@ export const paths = {
   dashboard: {
     overview: '/dashboard/overview',
     account: '/dashboard/account',
-    customers: '/dashboard/customers',
     taxis: '/dashboard/taxis',
     feedback: '/dashboard/feedback',
     integrations: '/dashboard/integrations',
-    settings: '/dashboard/settings',
     user: '/dashboard/user',
     vehicleSearch: '/dashboard/vehicle-search',
     adminUsers: '/dashboard/admin-users',
