@@ -95,12 +95,23 @@ class AuthClient {
       const err = error_ as Record<string, unknown>;
       let errorMessage = 'Sign in failed';
       
+      console.error('[Auth Client] Sign in error:', error_);
+      
       // Handle axios error response
-      if ((err as Record<string, unknown>).response && typeof (err as Record<string, unknown>).response === 'object') {
-        const responseData = (err as Record<string, unknown>).response as Record<string, unknown>;
-        errorMessage = (responseData.data as Record<string, unknown>)?.message as string || 'Sign in failed';
-      } else if ((err as Record<string, unknown>).message) {
-        errorMessage = (err as Record<string, unknown>).message as string;
+      if (err.response && typeof err.response === 'object' && err.response !== null) {
+        const responseData = err.response as Record<string, unknown>;
+        const data = responseData.data as Record<string, unknown> | undefined;
+        const status = responseData.status as number | undefined;
+        
+        console.error('[Auth Client] Response error details:', { status, data });
+        
+        if (data?.error && typeof data.error === 'string') {
+          errorMessage = data.error;
+        } else if (data?.message && typeof data.message === 'string') {
+          errorMessage = data.message;
+        }
+      } else if (err.message && typeof err.message === 'string') {
+        errorMessage = err.message;
       }
       
       return { error: errorMessage };

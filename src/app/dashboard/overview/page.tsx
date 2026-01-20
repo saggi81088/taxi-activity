@@ -6,15 +6,13 @@ import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 
-import { Sales } from '@/components/dashboard/overview/sales';
-import { TotalProfit } from '@/components/dashboard/overview/total-profit';
-import { Traffic } from '@/components/dashboard/overview/traffic';
-import { TasksProgress } from '@/components/dashboard/overview/tasks-progress';
+import { AdminCount } from '@/components/dashboard/overview/admin-count';
+import { PromoterCount } from '@/components/dashboard/overview/promoter-count';
 import { LatestProducts } from '@/components/dashboard/overview/latest-products';
-import { LatestOrders } from '@/components/dashboard/overview/latest-orders';
 import { Budget } from '@/components/dashboard/overview/budget';
 import { SamplingCompletedToday } from '@/components/dashboard/overview/sampling-completed-today';
 import { DailySamplingTrend } from '@/components/dashboard/overview/daily-sampling-trend';
+import { SamplingCompleted } from '@/components/dashboard/overview/sampling-completed';
 import axiosInstance from '@/lib/axios';
 import { useUser } from '@/hooks/use-user';
 
@@ -71,21 +69,10 @@ export default function Page() {
 
     fetchData();
   }, [isLoading]);
-  const salesSeries = [
-    { name: 'This year', data: [18, 25, 30, 45, 65, 55, 70, 60, 80, 75, 90, 100] },
-  ];
-
-  const trafficSeries = [45, 30, 25];
-  const trafficLabels = ['Desktop', 'Tablet', 'Phone'];
 
   const latestProducts = [
     { id: '1', image: '/assets/product-1.png', name: 'Perfume A', updatedAt: new Date() },
     { id: '2', image: '/assets/product-2.png', name: 'Perfume B', updatedAt: new Date() },
-  ];
-
-  const latestOrders: Array<{ id: string; customer: { name: string }; amount: number; status: 'delivered' | 'pending' | 'refunded'; createdAt: Date }> = [
-    { id: 'ORD-1001', customer: { name: 'Sofia' }, amount: 120, status: 'delivered', createdAt: new Date() },
-    { id: 'ORD-1002', customer: { name: 'Liam' }, amount: 80, status: 'pending', createdAt: new Date() },
   ];
 
   return (
@@ -104,44 +91,33 @@ export default function Page() {
             <SamplingCompletedToday value={`${samplingCount}`} />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-            <TasksProgress value={75.5} />
+            <AdminCount />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-            <TotalProfit value="$15k" />
+            <PromoterCount />
           </Grid>
         </Grid>
 
-        {/* Daily Sampling Trend - Most Important Chart */}
+        {/* Daily Sampling Trend with Sampling Charts - Side by Side */}
         <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid size={{ xs: 12 }}>
+          <Grid size={{ xs: 12, lg: 6 }}>
             <Box sx={{ minHeight: 400 }}>
               <DailySamplingTrend sx={{ height: '100%' }} />
             </Box>
           </Grid>
-        </Grid>
-
-        {/* Main content: Sales chart + Traffic card side-by-side (50% / 50%) */}
-        <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid size={{ xs: 12, lg: 8 }}>
-            <Box sx={{ minHeight: 365 }}>
-              <Sales chartSeries={salesSeries} sx={{ height: '100%' }} />
-            </Box>
-          </Grid>
-          <Grid size={{ xs: 12, lg: 4 }}>
-            <Box sx={{ height: '100%' }}>
-              <Traffic chartSeries={trafficSeries} labels={trafficLabels} sx={{ height: '100%' }} />
-            </Box>
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <Grid container spacing={3} sx={{ height: '100%' }}>
+              <Grid size={{ xs: 12 }}>
+                <SamplingCompleted sx={{ height: '100%' }} />
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
 
-        {/* Secondary row: traffic, products, orders */}
+        {/* Secondary row: Latest Products */}
         <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+          <Grid size={{ xs: 12 }}>
             <LatestProducts products={latestProducts} />
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 12, lg: 8 }}>
-            <LatestOrders orders={latestOrders} />
           </Grid>
         </Grid>
       </Container>

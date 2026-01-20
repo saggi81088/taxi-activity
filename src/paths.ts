@@ -11,6 +11,8 @@ export const paths = {
     settings: '/dashboard/settings',
     user: '/dashboard/user',
     vehicleSearch: '/dashboard/vehicle-search',
+    adminUsers: '/dashboard/admin-users',
+    promoterUsers: '/dashboard/promoter-users',
   },
   errors: { notFound: '/errors/not-found' },
 } as const;
