@@ -148,7 +148,7 @@ export function FeedbackTable({
                         <TableCell>
                           <Typography variant="subtitle2">{row.email || '-'}</Typography>
                         </TableCell>
-                        <TableCell>
+                        <TableCell align="center">
                           <Box
                             sx={{
                               backgroundColor: row.isLiked === '1' ? '#c8e6c9' : '#ffccbc',
@@ -157,14 +157,15 @@ export function FeedbackTable({
                               py: 0.5,
                               borderRadius: 0.5,
                               fontWeight: 500,
-                              fontSize: '0.75rem',
+                              fontSize: '0.65rem',
                               display: 'inline-block',
+                              whiteSpace: 'nowrap',
                             }}
                           >
                             {row.isLiked === '1' ? '✓ Yes' : '✗ No'}
                           </Box>
                         </TableCell>
-                        <TableCell>
+                        <TableCell align="center">
                           <Box
                             sx={{
                               backgroundColor: row.hasPassengerLiked === '1' ? '#c8e6c9' : '#ffccbc',
@@ -173,14 +174,15 @@ export function FeedbackTable({
                               py: 0.5,
                               borderRadius: 0.5,
                               fontWeight: 500,
-                              fontSize: '0.75rem',
+                              fontSize: '0.65rem',
                               display: 'inline-block',
+                              whiteSpace: 'nowrap',
                             }}
                           >
                             {row.hasPassengerLiked === '1' ? '✓ Yes' : '✗ No'}
                           </Box>
                         </TableCell>
-                        <TableCell>
+                        <TableCell align="center">
                           <Box
                             sx={{
                               backgroundColor: row.willUseAgain === '1' ? '#c8e6c9' : '#ffccbc',
@@ -189,8 +191,9 @@ export function FeedbackTable({
                               py: 0.5,
                               borderRadius: 0.5,
                               fontWeight: 500,
-                              fontSize: '0.75rem',
+                              fontSize: '0.65rem',
                               display: 'inline-block',
+                              whiteSpace: 'nowrap',
                             }}
                           >
                             {row.willUseAgain === '1' ? '✓ Yes' : '✗ No'}

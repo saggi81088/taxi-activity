@@ -10,10 +10,12 @@ import { DownloadIcon } from '@phosphor-icons/react/dist/ssr/Download';
 import axiosInstance from '@/lib/axios';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
+import { useUser } from '@/hooks/use-user';
 import { FeedbackTable } from '@/components/dashboard/feedback/feedback-table';
 import type { Feedback } from '@/components/dashboard/feedback/feedback-table';
 
 export default function Page(): React.JSX.Element {
+  const { user } = useUser();
   const [feedbacks, setFeedbacks] = React.useState<Feedback[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -36,7 +38,7 @@ export default function Page(): React.JSX.Element {
 
         // Map API response to Feedback interface
         if (response.data && response.data.clients && Array.isArray(response.data.clients)) {
-          const mappedFeedbacks: Feedback[] = response.data.clients.map((item: Record<string, unknown>) => {
+          let mappedFeedbacks: Feedback[] = response.data.clients.map((item: Record<string, unknown>) => {
             const feedback: Feedback = {
               id: String(item.id || ''),
               taxiNumber: String(item.taxi_number || ''),
@@ -51,6 +53,12 @@ export default function Page(): React.JSX.Element {
             };
             return feedback;
           });
+
+          // Filter by user role - promoters only see their own feedback
+          if (user?.role === 'promoter' && user?.email) {
+            mappedFeedbacks = mappedFeedbacks.filter((feedback) => feedback.email === user.email);
+          }
+
           // Sort by createdAt in descending order (latest first)
           mappedFeedbacks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
           setFeedbacks(mappedFeedbacks);
@@ -81,16 +89,20 @@ export default function Page(): React.JSX.Element {
     };
 
     fetchFeedbacks();
-  }, []);
+  }, [user?.role, user?.email]);
 
   const handleExport = () => {
-    if (feedbacks.length === 0) {
+    const dataToExport = user?.role === 'promoter' && user?.email
+      ? feedbacks.filter((feedback) => feedback.email === user.email)
+      : feedbacks;
+
+    if (dataToExport.length === 0) {
       alert('No data to export');
       return;
     }
 
     // Prepare data for Excel
-    const excelData = feedbacks.map((feedback) => ({
+    const excelData = dataToExport.map((feedback) => ({
       'Taxi Number': feedback.taxiNumber,
       'Driver Name': feedback.driverName,
       'Fragrance': feedback.fragrance,

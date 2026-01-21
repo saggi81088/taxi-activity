@@ -26,6 +26,11 @@ export function SideNav(): React.JSX.Element {
 
 	// Filter nav items based on user role
 	const filteredNavItems = navItems.filter((item) => {
+		// Hide Overview for promoters
+		if (item.key === "overview" && user?.role === "promoter") {
+			return false;
+		}
+		
 		// Hide User item for promoters
 		if (item.key === "user" && user?.role === "promoter") {
 			return false;

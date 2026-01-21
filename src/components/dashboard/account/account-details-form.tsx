@@ -69,7 +69,7 @@ export function AccountDetailsForm(): React.JSX.Element {
                   label="Mobile number" 
                   name="mobile" 
                   type="tel"
-                  value={''}
+                  value={user?.mobile || ''}
                   readOnly
                 />
               </FormControl>

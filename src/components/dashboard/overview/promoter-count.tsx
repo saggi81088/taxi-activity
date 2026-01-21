@@ -5,14 +5,15 @@ import Avatar from '@mui/material/Avatar';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Stack from '@mui/material/Stack';
-import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import { Users } from '@phosphor-icons/react/dist/ssr/Users';
-import { useUsers } from '@/hooks/use-users';
 
-export function PromoterCount(): React.JSX.Element {
-  const { promoterCount, isLoading } = useUsers();
+export interface PromoterCountProps {
+  count?: number;
+  _isLoading?: boolean;
+}
 
+export function PromoterCount({ count = 0, _isLoading = false }: PromoterCountProps): React.JSX.Element {
   return (
     <Card>
       <CardContent>
@@ -22,11 +23,7 @@ export function PromoterCount(): React.JSX.Element {
               <Typography color="text.secondary" variant="overline">
                 Promoter Users
               </Typography>
-              {isLoading ? (
-                <CircularProgress size={32} />
-              ) : (
-                <Typography variant="h4">{promoterCount}</Typography>
-              )}
+              <Typography variant="h4">{count}</Typography>
             </Stack>
             <Avatar sx={{ backgroundColor: 'var(--mui-palette-warning-main)', height: '56px', width: '56px' }}>
               <Users fontSize="var(--icon-fontSize-lg)" />

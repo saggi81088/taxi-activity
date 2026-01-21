@@ -89,7 +89,7 @@ export function TaxiRegistrationForm({ defaultTaxiNumber = '', onSubmit, onRegis
         await Swal.fire({
           icon: 'success',
           title: 'Success',
-          text: 'Taxi registered successfully!',
+          text: 'Taxi Registered Successfully!',
         });
 
         reset(); // Reset form after successful submission
@@ -247,19 +247,15 @@ export function TaxiRegistrationForm({ defaultTaxiNumber = '', onSubmit, onRegis
             disabled={isPending} 
             type="submit" 
             variant="contained"
-            sx={{ position: 'relative' }}
           >
-            {isPending && (
-              <CircularProgress
-                size={24}
-                sx={{
-                  position: 'absolute',
-                  left: '50%',
-                  marginLeft: '-12px',
-                }}
-              />
+            {isPending ? (
+              <>
+                <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
+                Registering...
+              </>
+            ) : (
+              "Submit"
             )}
-            <span style={{ opacity: isPending ? 0 : 1 }}>Submit</span>
           </Button>
         </Stack>
       </form>

@@ -20,6 +20,11 @@ export function AccountInfo(): React.JSX.Element {
           </div>
           <Stack spacing={1} sx={{ textAlign: 'center' }}>
             <Typography variant="h5">{user?.name || 'User'}</Typography>
+            {user?.mobile && typeof user.mobile === 'string' ? (
+              <Typography color="text.secondary" variant="body2">
+                {user.mobile}
+              </Typography>
+            ) : null}
             <Typography color="text.secondary" variant="body2">
               Goa City
             </Typography>

@@ -9,11 +9,13 @@ import { DownloadIcon } from '@phosphor-icons/react/dist/ssr/Download';
 import axiosInstance from '@/lib/axios';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
+import { useUser } from '@/hooks/use-user';
 import { TaxisFilters } from '@/components/dashboard/taxi/taxi-filters';
 import { TaxisTable } from '@/components/dashboard/taxi/taxi-table';
 import type { Taxi } from '@/components/dashboard/taxi/taxi-table';
 
 export default function Page(): React.JSX.Element {
+  const { user } = useUser();
   const [filters, setFilters] = React.useState({
     location: '',
     status: '',
@@ -123,7 +125,14 @@ export default function Page(): React.JSX.Element {
   };
 
   const filteredTaxis = React.useMemo(() => {
-    const filtered = taxis.filter((taxi) => {
+    let filtered = taxis;
+
+    // Filter by user role - promoters only see their own entries
+    if (user?.role === 'promoter' && user?.email) {
+      filtered = filtered.filter((taxi) => taxi.driverEmail === user.email);
+    }
+
+    filtered = filtered.filter((taxi) => {
       let matches = true;
 
       if (filters.location && taxi.location !== filters.location) {
@@ -163,7 +172,7 @@ export default function Page(): React.JSX.Element {
 
     // Sort by createdAt in descending order (latest first)
     return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [filters, taxis]);
+  }, [filters, taxis, user?.role, user?.email]);
 
   return (
     <Stack spacing={3}>

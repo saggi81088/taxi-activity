@@ -21,28 +21,6 @@ export default function VehicleSearchPage(): React.JSX.Element {
 	const [registeredDriverName, setRegisteredDriverName] = React.useState("");
 	const [registrationCompleted, setRegistrationCompleted] = React.useState(false);
 
-	// Auto-hide registration completed message after 5 seconds
-	React.useEffect(() => {
-		if (registrationCompleted) {
-			// Show success alert
-			Swal.fire({
-				icon: "success",
-				title: "Success",
-				text: "Feedback Submitted Successfully!",
-			});
-
-			const timer = setTimeout(() => {
-				setRegistrationCompleted(false);
-				// Reset everything for new search
-				setSearchResult(null);
-				setTaxiRegistered(false);
-				setCarNumber("");
-				setRegisteredDriverName("");
-			}, 5000);
-			return () => clearTimeout(timer);
-		}
-	}, [registrationCompleted]);
-
 	const handleSearch = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsSearching(true);
@@ -129,8 +107,20 @@ export default function VehicleSearchPage(): React.JSX.Element {
 		setSearchResult(null);
 	};
 
-	const handleFeedbackSuccess = () => {
-		setRegistrationCompleted(true);
+	const handleFeedbackSuccess = async () => {
+		// Show Taxi Registration Completed popup after feedback is submitted
+		await Swal.fire({
+			icon: 'success',
+			title: 'Success',
+			text: 'Taxi Registration Completed!',
+		});
+
+		// Reset everything for new search
+		setSearchResult(null);
+		setTaxiRegistered(false);
+		setCarNumber('');
+		setRegisteredDriverName('');
+		setRegistrationCompleted(false);
 	};
 
 	return (
@@ -160,7 +150,14 @@ export default function VehicleSearchPage(): React.JSX.Element {
 							sx={{ fontSize: 18, px: 6, borderRadius: 2, width: { xs: "100%", sm: 300 } }}
 							disabled={!carNumber.trim() || isSearching}
 						>
-							{isSearching ? <CircularProgress size={24} color="inherit" /> : "Search Vehicle"}
+							{isSearching ? (
+								<>
+									<CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
+									Searching...
+								</>
+							) : (
+								"Search Vehicle"
+							)}
 						</Button>
 					</Stack>
 					</form>
