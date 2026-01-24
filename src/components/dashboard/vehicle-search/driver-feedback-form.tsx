@@ -104,12 +104,33 @@ export function DriverFeedbackForm({ driverName, taxiNumber, onSubmit }: DriverF
           await onSubmit(values);
         }
       } catch (error_: unknown) {
-        const err = error_ as Record<string, unknown>;
-        const errorMsg = (err as Record<string, unknown>).response && typeof (err as Record<string, unknown>).response === 'object' ? ((err as Record<string, unknown>).response as Record<string, unknown>).data : ((err as Record<string, unknown>) as Record<string, unknown>).message || 'Feedback submission failed';
+        let errorMsg = 'Feedback submission failed';
+        
+        if (error_ instanceof Error) {
+          errorMsg = error_.message;
+        } else if (typeof error_ === 'object' && error_ !== null) {
+          const err = error_ as Record<string, unknown>;
+          
+          // Try to extract error from axios response
+          if (err.response && typeof err.response === 'object' && err.response !== null) {
+            const response = err.response as Record<string, unknown>;
+            if (response.data && typeof response.data === 'object' && response.data !== null) {
+              const data = response.data as Record<string, unknown>;
+              
+              // If data has field-specific errors, get the first error message
+              if (data.message && typeof data.message === 'string') {
+                errorMsg = data.message;
+              } else if (data.error && typeof data.error === 'string') {
+                errorMsg = data.error;
+              }
+            }
+          }
+        }
+        
         await Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: String(errorMsg),
+          text: errorMsg,
         });
       } finally {
         setIsPending(false);
