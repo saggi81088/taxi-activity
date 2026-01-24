@@ -19,6 +19,21 @@ function decodeToken(token: string): { data?: Record<string, unknown>; error?: s
   }
 }
 
+// Check if JWT token is expired
+function isTokenExpired(token: string): boolean {
+  try {
+    const { data } = decodeToken(token);
+    if (!data || !data.exp) {
+      return true; // If no expiration, consider it expired
+    }
+    const expirationTime = Number(data.exp) * 1000; // Convert to milliseconds
+    const currentTime = Date.now();
+    return currentTime >= expirationTime;
+  } catch {
+    return true; // If error decoding, consider it expired
+  }
+}
+
 function generateToken(): string {
   const arr = new Uint8Array(12);
   globalThis.crypto.getRandomValues(arr);
@@ -133,6 +148,13 @@ class AuthClient {
     const token = localStorage.getItem('custom-auth-token');
 
     if (!token) {
+      return { data: null };
+    }
+
+    // Check if token is expired
+    if (isTokenExpired(token)) {
+      // Auto logout if token expired
+      localStorage.removeItem('custom-auth-token');
       return { data: null };
     }
 

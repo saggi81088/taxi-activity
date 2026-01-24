@@ -135,7 +135,7 @@ export function TaxiRegistrationForm({ defaultTaxiNumber = '', onSubmit, onRegis
             render={({ field }) => (
               <FormControl error={Boolean(errors.taxiNumber)}>
                 <InputLabel>Taxi / Vehicle registration number</InputLabel>
-                <OutlinedInput {...field} label="Taxi / Vehicle registration number" />
+                <OutlinedInput {...field} label="Taxi / Vehicle registration number" readOnly />
                 {errors.taxiNumber ? <FormHelperText>{errors.taxiNumber.message}</FormHelperText> : null}
               </FormControl>
             )}
