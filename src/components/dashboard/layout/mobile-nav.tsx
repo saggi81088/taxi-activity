@@ -33,6 +33,11 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
 
   // Filter nav items based on user role
   const filteredNavItems = navItems.filter((item) => {
+    // Hide Overview for promoters
+    if (item.key === "overview" && user?.role === "promoter") {
+      return false;
+    }
+    
     // Hide User item for promoters
     if (item.key === "user" && user?.role === "promoter") {
       return false;
@@ -110,18 +115,18 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
             <CircularProgress size={24} sx={{ color: 'white' }} />
           </Box>
         )}
-        {renderNavItems({ pathname, items: filteredNavItems, onNavigate: startTransition })}
+        {renderNavItems({ pathname, items: filteredNavItems, onNavigate: startTransition, onClose })}
       </Box>
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
     </Drawer>
   );
 }
 
-function renderNavItems({ items = [], pathname, onNavigate, level = 0 }: { items?: NavItemConfig[]; pathname: string; onNavigate?: (fn: () => void) => void; level?: number }): React.JSX.Element {
+function renderNavItems({ items = [], pathname, onNavigate, onClose, level = 0 }: { items?: NavItemConfig[]; pathname: string; onNavigate?: (fn: () => void) => void; onClose?: () => void; level?: number }): React.JSX.Element {
   const children = items.reduce((acc: React.ReactNode[], curr: NavItemConfig): React.ReactNode[] => {
     const { key, ...item } = curr;
 
-    acc.push(<NavItem key={key} pathname={pathname} onNavigate={onNavigate} level={level} {...item} />);
+    acc.push(<NavItem key={key} pathname={pathname} onNavigate={onNavigate} onClose={onClose} level={level} {...item} />);
 
     return acc;
   }, []);
@@ -136,10 +141,11 @@ function renderNavItems({ items = [], pathname, onNavigate, level = 0 }: { items
 interface NavItemProps extends NavItemConfig {
   pathname: string;
   onNavigate?: (fn: () => void) => void;
+  onClose?: () => void;
   level?: number;
 }
 
-function NavItem({ disabled, external, href, icon, matcher, pathname, title, onNavigate, items, level = 0 }: NavItemProps): React.JSX.Element {
+function NavItem({ disabled, external, href, icon, matcher, pathname, title, onNavigate, onClose, items, level = 0 }: NavItemProps): React.JSX.Element {
   const router = useRouter();
   const [expanded, setExpanded] = React.useState(false);
   const hasSubItems = items && items.length > 0;
@@ -165,10 +171,13 @@ function NavItem({ disabled, external, href, icon, matcher, pathname, title, onN
       return;
     }
     
-    // Use transition to wrap navigation
+    // Use transition to wrap navigation and close the drawer
     onNavigate?.(() => {
       router.push(href);
     });
+    
+    // Close the mobile nav drawer after navigation
+    onClose?.();
   };
 
   return (
@@ -237,6 +246,7 @@ function NavItem({ disabled, external, href, icon, matcher, pathname, title, onN
             pathname,
             items,
             onNavigate,
+            onClose,
             level: level + 1,
           })}
         </Collapse>

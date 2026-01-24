@@ -96,7 +96,7 @@ export function DriverFeedbackForm({ driverName, taxiNumber, onSubmit }: DriverF
         await Swal.fire({
           icon: 'success',
           title: 'Success',
-          text: 'Taxi Registration Completed!',
+          text: 'Feedback Submitted Successfully!',
         });
         reset();
         
@@ -227,18 +227,15 @@ export function DriverFeedbackForm({ driverName, taxiNumber, onSubmit }: DriverF
             )}
           />
 
-          <Button disabled={isPending} type="submit" variant="contained" sx={{ position: 'relative' }}>
-            {isPending && (
-              <CircularProgress
-                size={24}
-                sx={{
-                  position: 'absolute',
-                  left: '50%',
-                  marginLeft: '-12px',
-                }}
-              />
+          <Button disabled={isPending} type="submit" variant="contained">
+            {isPending ? (
+              <>
+                <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
+                Submitting...
+              </>
+            ) : (
+              "Submit Feedback"
             )}
-            <span style={{ opacity: isPending ? 0 : 1 }}>Submit Feedback</span>
           </Button>
         </Stack>
       </form>

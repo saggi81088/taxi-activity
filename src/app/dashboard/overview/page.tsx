@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
@@ -18,9 +19,22 @@ import axiosInstance from '@/lib/axios';
 import { useUser } from '@/hooks/use-user';
 
 export default function Page() {
-  const { isLoading } = useUser();
+  const router = useRouter();
+  const { user, isLoading } = useUser();
+
+  // Hide Overview page for promoters
+  React.useEffect(() => {
+    if (!isLoading && user && user.role === 'promoter') {
+      router.push('/dashboard/taxis');
+    }
+  }, [user, isLoading, router]);
   const [taxiCount, setTaxiCount] = React.useState<number>(0);
   const [samplingCount, setSamplingCount] = React.useState<number>(0);
+  const [taxis, setTaxis] = React.useState<Array<Record<string, unknown>>>([]);
+  const [adminCount, setAdminCount] = React.useState<number>(0);
+  const [promoterCount, setPromoterCount] = React.useState<number>(0);
+  const [feedbackCount, setFeedbackCount] = React.useState<number>(0);
+  const [dataLoading, setDataLoading] = React.useState(true);
 
   React.useEffect(() => {
     // Only fetch data after user is loaded and authenticated
@@ -28,15 +42,26 @@ export default function Page() {
       return;
     }
 
-    const fetchData = async () => {
+    const fetchAllData = async () => {
       try {
-        const response = await axiosInstance.get('/taxi');
-        if (response.data.clients && Array.isArray(response.data.clients)) {
-          const allTaxis = response.data.clients;
+        setDataLoading(true);
+        console.log('🔵 [Overview] Fetching all dashboard data in parallel...');
+        
+        // Fetch all data in parallel
+        const [taxiRes, userlistRes, feedbackRes] = await Promise.all([
+          axiosInstance.get('/taxi'),
+          axiosInstance.get('/userlist'),
+          axiosInstance.get('/feedback'),
+        ]);
+        console.log('🟢 [Overview] All dashboard data fetched successfully');
+
+        // Process taxi data
+        if (taxiRes.data.clients && Array.isArray(taxiRes.data.clients)) {
+          const allTaxis = taxiRes.data.clients;
+          setTaxis(allTaxis);
           setTaxiCount(allTaxis.length);
 
           // Count taxis from today
-          // Get today's date in local timezone (not UTC)
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           const todayStartTime = today.getTime();
@@ -50,9 +75,7 @@ export default function Page() {
             if (!createdAtStr) return false;
             
             try {
-              // Parse the created_at timestamp
               const createdAtTime = new Date(createdAtStr).getTime();
-              // Check if it falls within today's range
               return createdAtTime >= todayStartTime && createdAtTime < tomorrowStartTime;
             } catch {
               return false;
@@ -61,14 +84,36 @@ export default function Page() {
           
           setSamplingCount(todayCount);
         }
+
+        // Process userlist data
+        const usersData = userlistRes.data?.data || userlistRes.data?.clients || [];
+        if (Array.isArray(usersData) && usersData.length > 0) {
+          const admins = usersData.filter((u: Record<string, unknown>) => u.role === 'admin').length;
+          const promoters = usersData.filter((u: Record<string, unknown>) => u.role === 'promoter').length;
+          console.log(`📊 [Overview] Users - Total: ${usersData.length}, Admins: ${admins}, Promoters: ${promoters}`);
+          setAdminCount(admins);
+          setPromoterCount(promoters);
+        } else {
+          console.log('⚠️  [Overview] No user data found');
+        }
+
+        // Process feedback data
+        if (feedbackRes.data.clients && Array.isArray(feedbackRes.data.clients)) {
+          setFeedbackCount(feedbackRes.data.clients.length);
+        }
       } catch (error) {
-        console.error('Failed to fetch taxi data:', error);
+        console.error('Failed to fetch dashboard data:', error);
         setTaxiCount(0);
         setSamplingCount(0);
+        setAdminCount(0);
+        setPromoterCount(0);
+        setFeedbackCount(0);
+      } finally {
+        setDataLoading(false);
       }
     };
 
-    fetchData();
+    fetchAllData();
   }, [isLoading]);
 
   const latestProducts = [
@@ -83,22 +128,26 @@ export default function Page() {
           Overview
         </Typography>
 
-        {/* Top metrics row - five compact cards */}
+        {/* First row - Admin Users, Promoter Users, Total Feedback */}
         <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+            <AdminCount count={adminCount} _isLoading={dataLoading} />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+            <PromoterCount count={promoterCount} _isLoading={dataLoading} />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+            <FeedbackCount count={feedbackCount} _isLoading={dataLoading} />
+          </Grid>
+        </Grid>
+
+        {/* Second row - Total Registered Taxis & Sampling Completed Today */}
+        <Grid container spacing={3} sx={{ mb: 3, justifyContent: 'center' }}>
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <Budget value={`${taxiCount}`} trend="up" />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <SamplingCompletedToday value={`${samplingCount}`} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
-            <AdminCount />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
-            <PromoterCount />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
-            <FeedbackCount />
           </Grid>
         </Grid>
 
@@ -106,13 +155,13 @@ export default function Page() {
         <Grid container spacing={3} sx={{ mb: 3 }}>
           <Grid size={{ xs: 12, lg: 6 }}>
             <Box sx={{ minHeight: 400 }}>
-              <DailySamplingTrend sx={{ height: '100%' }} />
+              <DailySamplingTrend sx={{ height: '100%' }} taxis={taxis} />
             </Box>
           </Grid>
           <Grid size={{ xs: 12, lg: 6 }}>
             <Grid container spacing={3} sx={{ height: '100%' }}>
               <Grid size={{ xs: 12 }}>
-                <SamplingCompleted sx={{ height: '100%' }} />
+                <SamplingCompleted sx={{ height: '100%' }} taxis={taxis} />
               </Grid>
             </Grid>
           </Grid>

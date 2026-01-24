@@ -179,6 +179,7 @@ export function TaxisTable({
             </Box>
             <Divider />
             <TablePagination
+              component="div"
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
               page={page_}

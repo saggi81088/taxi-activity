@@ -11,14 +11,19 @@ import axiosInstance from '@/lib/axios';
 
 interface SamplingCompletedProps {
   sx?: Record<string, unknown>;
+  taxis?: Array<Record<string, unknown>>;
 }
 
-export function SamplingCompleted({ sx }: SamplingCompletedProps): React.JSX.Element {
+const COLORS = ['#4CAF50', '#FFC107'];
+
+const renderCustomLabel = ({ value }: { value: number }): string => `${value}%`;
+
+export function SamplingCompleted({ sx, taxis = [] }: SamplingCompletedProps): React.JSX.Element {
   const [data, setData] = React.useState<Array<{ name: string; value: number }>>([
     { name: 'Completed', value: 0 },
     { name: 'In Progress', value: 0 },
   ]);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = React.useState(taxis.length === 0);
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -27,19 +32,21 @@ export function SamplingCompleted({ sx }: SamplingCompletedProps): React.JSX.Ele
         setIsLoading(true);
         setError(null);
 
-        const response = await axiosInstance.get('/taxi');
-        
-        if (response.data.clients && Array.isArray(response.data.clients)) {
-          const taxis = response.data.clients;
+        console.log('📈 [SamplingCompleted] Taxis prop received:', taxis.length > 0 ? `${taxis.length} items` : 'empty, will fetch from API');
+        const response = taxis.length > 0 ? { data: { clients: taxis } } : await axiosInstance.get('/taxi');
+        const allTaxis = response.data.clients || [];
 
+        if (Array.isArray(allTaxis)) {
           // Count by air_freshener_installed field
           // "1" = installed (sampling completed), "0" = not installed (sampling pending)
-          const completedCount = taxis.filter((taxi: Record<string, unknown>) => {
-            return String(taxi.air_freshener_installed) === '1';
+          const completedCount = allTaxis.filter((taxi: Record<string, unknown>) => {
+            const value = String(taxi.air_freshener_installed);
+            return value === '1';
           }).length;
 
-          const pendingCount = taxis.filter((taxi: Record<string, unknown>) => {
-            return String(taxi.air_freshener_installed) === '0';
+          const pendingCount = allTaxis.filter((taxi: Record<string, unknown>) => {
+            const value = String(taxi.air_freshener_installed);
+            return value === '0';
           }).length;
 
           const total = completedCount + pendingCount || 1; // Avoid division by zero
@@ -49,8 +56,8 @@ export function SamplingCompleted({ sx }: SamplingCompletedProps): React.JSX.Ele
             { name: 'Sampling Pending', value: Math.round((pendingCount / total) * 100) },
           ]);
         }
-      } catch (err) {
-        console.error('Failed to fetch sampling status:', err);
+      } catch (error_) {
+        console.error('Failed to fetch sampling status:', error_);
         setError('Failed to load sampling data');
         // Keep showing zeros on error
         setData([
@@ -63,9 +70,7 @@ export function SamplingCompleted({ sx }: SamplingCompletedProps): React.JSX.Ele
     };
 
     fetchSamplingStatus();
-  }, []);
-
-  const COLORS = ['#4CAF50', '#FFC107'];
+  }, [taxis]);
 
   return (
     <Card sx={sx}>
@@ -88,12 +93,13 @@ export function SamplingCompleted({ sx }: SamplingCompletedProps): React.JSX.Ele
                 outerRadius={100}
                 paddingAngle={2}
                 dataKey="value"
+                label={renderCustomLabel}
               >
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip formatter={(value) => `${value}%`} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>

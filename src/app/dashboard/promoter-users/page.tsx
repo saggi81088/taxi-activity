@@ -22,9 +22,12 @@ export default function Page(): React.JSX.Element {
 
         const response = await axiosInstance.get('/userlist');
 
-        if (response.data && response.data.clients && Array.isArray(response.data.clients)) {
+        // API response has data under response.data.data
+        const usersData = response.data?.data || response.data?.clients || [];
+        
+        if (Array.isArray(usersData) && usersData.length > 0) {
           // Filter only promoter users
-          const promoterUsers: PromoterUser[] = response.data.clients
+          const promoterUsers: PromoterUser[] = usersData
             .filter((item: Record<string, unknown>) => item.role === 'promoter')
             .map((item: Record<string, unknown>) => ({
               id: String(item.id || ''),
